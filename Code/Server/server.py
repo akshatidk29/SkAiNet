@@ -5,7 +5,7 @@ import threading
 app = Flask(__name__)
 
 # ---------- SERIAL SETUP ----------
-SERIAL_PORT = 'COM3'  # Update as needed
+SERIAL_PORT = 'COM3'
 BAUDRATE = 115200
 
 try:
@@ -27,8 +27,9 @@ def read_serial():
             if line.startswith("SRC="):
                 try:
                     header, content = line.split(":")
-                    src_part, msg_part = header.split(",")
+                    src_part,cur_part, msg_part = header.split(",")
                     src = src_part.split("=")[1]
+                    cur = cur_part.split("=")[1]
                     msg_id = msg_part.split("=")[1]
 
                     # Parse content: "Name-Message"
@@ -42,6 +43,7 @@ def read_serial():
                     if not any(m['src'] == src and m['msg_id'] == msg_id for m in messages):
                         messages.append({
                             "src": src,
+                            "cur" : cur,
                             "msg_id": msg_id,
                             "name": name,
                             "message": msg_text
@@ -96,6 +98,7 @@ HTML_TEMPLATE = """
 {% for msg in messages %}
 <tr>
 <td class="src">{{ msg.src }}</td>
+<td class="cur">{{ msg.cur }}</td>
 <td class="name">{{ msg.name }}</td>
 <td class="message">{{ msg.message }}</td>
 </tr>

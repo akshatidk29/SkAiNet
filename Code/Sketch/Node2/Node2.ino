@@ -27,7 +27,6 @@ char rxpacket[BUFFER_SIZE];
 bool lora_idle = true;
 static RadioEvents_t RadioEvents;
 
-int localMsgCounter = 0;
 String pendingMsg = "";
 
 const int REBROADCASTS = 5;
@@ -51,6 +50,7 @@ bool seenMessage(int src, int msgId) {
   }
   return false;
 }
+
 void addToCache(int src, int msgId) {
   cache[cacheIndex] = { src, msgId };
   cacheIndex = (cacheIndex + 1) % CACHE_SIZE;
@@ -62,6 +62,7 @@ void VextON(void) {
   pinMode(Vext, OUTPUT);
   digitalWrite(Vext, LOW);
 }
+
 void showOLED(String l1, String l2 = "", String l3 = "", String l4 = "") {
   display.clear();
   display.setFont(ArialMT_Plain_10);
@@ -143,11 +144,12 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   String header = msg.substring(0, sep);
   String content = msg.substring(sep + 1);
 
-  int src = -1, msgId = -1;
-  sscanf(header.c_str(), "SRC=%d,MSG=%d", &src, &msgId);
+  int src = -1, cur = -1, msgId = -1;
+  sscanf(header.c_str(), "SRC=%d,CUR=%d,MSG=%d", &src, &cur, &msgId);
 
   Serial.println("[DEBUG] Received message:");
   Serial.println("        Source: Node " + String(src));
+  Serial.println("        Current: Node " + String(cur));
   Serial.println("        MsgID: " + String(msgId));
   Serial.println("        Content: " + content);
   Serial.println("        RSSI: " + String(rssi));
@@ -162,6 +164,16 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
       Serial.println("[DEBUG] Added message to inbox and cache.");
 
       // Rebroadcast received message 5 times
+      int curIndex = msg.indexOf("CUR=");
+      if (curIndex != -1) {
+        int commaAfterCur = msg.indexOf(',', curIndex + 4);
+        if (commaAfterCur == -1) commaAfterCur = msg.indexOf(':', curIndex + 4);
+        if (commaAfterCur != -1) {
+          // Replace the old CUR field
+          msg = msg.substring(0, curIndex) + "CUR=" + String(NODE_ID) + msg.substring(commaAfterCur);
+        }
+      }
+
       startSendLoRaMessage(msg);
       Serial.println("[DEBUG] Rebroadcasting message.");
     } else {
@@ -238,19 +250,21 @@ void setupWeb() {
     if (request->hasParam("name")) name = request->getParam("name")->value();
     if (request->hasParam("info")) info = request->getParam("info")->value();
 
-    String payload = "SRC=" + String(NODE_ID) + ",MSG=" + String(localMsgCounter++) + ":" + name + "-" + info;
+    int id = random(1000, 9999);
+    String payload = "SRC=" + String(NODE_ID) + ",CUR=" + String(NODE_ID) + ",MSG=" + String(id) + ":" + name + "-" + info;
     pendingMsg = payload;
     startSendLoRaMessage(payload);
     showOLED("LoRa TX", name, info);
 
     Serial.println("[DEBUG] Web submit:");
+    Serial.println("        MsgID: " + String(id));
     Serial.println("        Name: " + name);
     Serial.println("        Info: " + info);
     Serial.println("        Payload queued for sending.");
 
     request->send(200, "text/html", "<h3>Message sent! Redirecting...</h3><meta http-equiv='refresh' content='1; url=/' />");
   });
-  
+
   // Captive portal triggers
   server.on("/generate_204", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->redirect("/");
@@ -272,7 +286,7 @@ void setupWeb() {
 void setup() {
   Serial.begin(115200);
   Mcu.begin(HELTEC_BOARD, SLOW_CLK_TPYE);
-
+  randomSeed(micros());
   // OLED
   VextON();
   delay(100);
