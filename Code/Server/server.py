@@ -4,7 +4,6 @@ import threading
 
 app = Flask(__name__)
 
-# ---------- SERIAL SETUP ----------
 SERIAL_PORT = 'COM3'
 BAUDRATE = 115200
 
@@ -16,10 +15,9 @@ except Exception as e:
     ser = None
 
 # ---------- GLOBALS ----------
-messages = []  # Store received messages
+messages = []  
 
 
-# ---------- SERIAL READING THREAD ----------
 def read_serial():
     while True:
         if ser and ser.in_waiting:

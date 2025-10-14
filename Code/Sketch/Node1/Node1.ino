@@ -6,8 +6,11 @@
 #include <Wire.h>
 #include "HT_SSD1306Wire.h"
 
-// ================= LoRa Config ==================
-#define RF_FREQUENCY 866000000  // Hz (India ISM: 865–867 MHz)
+#include <AESLib.h>
+#include <Base64.h>
+
+// --- LoRa Config ---
+#define RF_FREQUENCY 866000000  // Hz
 #define TX_OUTPUT_POWER 14
 #define LORA_BANDWIDTH 0
 #define LORA_SPREADING_FACTOR 7
@@ -21,7 +24,61 @@
 
 #define NODE_ID 1
 
-// ================= Globals ==================
+
+AESLib aesLib;
+
+// --- AES key ---
+byte aes_key[16] = { 'm', 'y', 's', 'e', 'c', 'r', 'e', 't', 'k', 'e', 'y', '1', '2', '3', '4' };
+byte aes_iv[16] = { 'i', 'n', 'i', 't', 'v', 'e', 'c', '1', '2', '3', '4', '5', '6', '7' };
+
+// --- ENCRYPTION-DECRYPTION ---
+String encryptString(String msg) {
+  int msgLen = msg.length() + 1;
+  int paddedLen = msgLen + (16 - (msgLen % 16)) % 16;
+
+  byte input[paddedLen];
+  memset(input, 0, paddedLen);
+  memcpy(input, msg.c_str(), msgLen);
+
+  byte encrypted[paddedLen];
+  memset(encrypted, 0, paddedLen);
+
+  byte iv_copy[16];
+  memcpy(iv_copy, aes_iv, 16);
+
+  aesLib.encrypt(input, paddedLen, encrypted, aes_key, 128, iv_copy);
+
+  int encodedLen = base64_enc_len(paddedLen);
+  char encoded[encodedLen + 1];
+  base64_encode(encoded, (char *)encrypted, paddedLen);
+  encoded[encodedLen] = '\0';
+
+  return String(encoded);
+}
+
+
+String decryptString(String base64msg) {
+  int decodedLen = base64_dec_len(base64msg.c_str(), base64msg.length());
+  byte decoded[decodedLen];
+  memset(decoded, 0, decodedLen);
+
+  base64_decode((char *)decoded, base64msg.c_str(), base64msg.length());
+
+  byte decrypted[decodedLen + 1];
+  memset(decrypted, 0, sizeof(decrypted));
+
+  byte iv_copy[16];
+  memcpy(iv_copy, aes_iv, 16);
+
+  aesLib.decrypt(decoded, decodedLen, decrypted, aes_key, 128, iv_copy);
+  decrypted[decodedLen] = '\0';
+
+  return String((char *)decrypted);
+}
+
+
+
+// --- GLOBAL ---
 char txpacket[BUFFER_SIZE];
 char rxpacket[BUFFER_SIZE];
 bool lora_idle = true;
@@ -30,11 +87,11 @@ static RadioEvents_t RadioEvents;
 String pendingMsg = "";
 
 const int REBROADCASTS = 5;
-const int REBROADCAST_DELAY = 1000;  // ms between repeats
+const int REBROADCAST_DELAY = 1000;
 int rebroadcastsLeft = 0;
 unsigned long lastTxTime = 0;
 
-// Message cache (for duplicate filtering)
+// Message cache
 struct MessageCacheEntry {
   int src;
   int msgId;
@@ -56,7 +113,7 @@ void addToCache(int src, int msgId) {
   cacheIndex = (cacheIndex + 1) % CACHE_SIZE;
 }
 
-// ================= OLED ==================
+// --- OLED ---
 static SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
 void VextON(void) {
   pinMode(Vext, OUTPUT);
@@ -74,7 +131,7 @@ void showOLED(String l1, String l2 = "", String l3 = "", String l4 = "") {
   display.display();
 }
 
-// ================= WiFi & Captive Portal ==================
+// --- WiFi & Captive Portal ---
 const byte DNS_PORT = 53;
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
@@ -82,7 +139,7 @@ IPAddress netMsk(255, 255, 255, 0);
 DNSServer dnsServer;
 AsyncWebServer server(80);
 
-// Inbox for received messages
+// Inbox
 struct Msg {
   String from;
   String content;
@@ -91,18 +148,19 @@ struct Msg {
 std::vector<Msg> inbox;
 
 
-// ================= LoRa Helpers ==================
+// LoRa Functions
 void startSendLoRaMessage(String payload) {
+  payload = encryptString(payload);
   snprintf(txpacket, BUFFER_SIZE, "%s", payload.c_str());
   pendingMsg = payload;
-  rebroadcastsLeft = REBROADCASTS;  // always send 5 times
-  lastTxTime = 0;                   // trigger immediate send
+  rebroadcastsLeft = REBROADCASTS;
+  lastTxTime = 0;
   Serial.println("[DEBUG] startSendLoRaMessage called:");
   Serial.println("        Payload: " + payload);
   Serial.println("        Rebroadcasts left: " + String(rebroadcastsLeft));
 }
 
-// Non-blocking retransmission handler
+// Retransmission
 void handleLoRaTx() {
   if (rebroadcastsLeft > 0 && lora_idle && millis() - lastTxTime >= REBROADCAST_DELAY) {
     Radio.Send((uint8_t *)txpacket, strlen(txpacket));
@@ -114,7 +172,7 @@ void handleLoRaTx() {
   }
 }
 
-// ================= LoRa Callbacks ==================
+// Callbacks
 void OnTxDone(void) {
   lora_idle = true;
   Serial.println("[DEBUG] Transmission done.");
@@ -133,8 +191,9 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   Radio.Sleep();
 
   String msg = String(rxpacket);
-
   Serial.println("Recieved Something " + msg);
+  msg = decryptString(msg);
+  Serial.println("Decrypted " + msg);
   int sep = msg.indexOf(':');
   if (sep == -1) {
     Radio.Rx(0);
@@ -163,7 +222,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
       showOLED("LoRa RX", "From " + String(src), content, "RSSI " + String(rssi));
       Serial.println("[DEBUG] Added message to inbox and cache.");
 
-      // Rebroadcast received message 5 times
+      // Rebroadcast
       int curIndex = msg.indexOf("CUR=");
       if (curIndex != -1) {
         int commaAfterCur = msg.indexOf(',', curIndex + 4);
@@ -187,7 +246,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 }
 
 
-// ================= Web Server ==================
+// Web Server
 String htmlPage() {
   String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
   html += "<title>SkyNet Node " + String(NODE_ID) + "</title>";
@@ -225,10 +284,7 @@ String htmlPage() {
   } else {
     html += "<ul>";
     for (auto &m : inbox) {
-      if (m.unread) {
-        html += "<li><b>" + m.from + ":</b> " + m.content + "</li>";
-        // m.unread = false;  // mark as read
-      }
+      html += "<li><b>" + m.from + ":</b> " + m.content + "</li>";
     }
     html += "</ul>";
   }
@@ -282,7 +338,7 @@ void setupWeb() {
   server.begin();
 }
 
-// ================= Setup ==================
+// --- SetUP
 void setup() {
   Serial.begin(115200);
   Mcu.begin(HELTEC_BOARD, SLOW_CLK_TPYE);
@@ -321,7 +377,7 @@ void setup() {
   Radio.Rx(0);
 }
 
-// ================= Loop ==================
+// --- Loop ---
 void loop() {
   dnsServer.processNextRequest();
   Radio.IrqProcess();

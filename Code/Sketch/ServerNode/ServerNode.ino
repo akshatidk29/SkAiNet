@@ -3,8 +3,11 @@
 #include "Arduino.h"
 #include "HT_SSD1306Wire.h"
 
-// ================= LoRa Config ==================
-#define RF_FREQUENCY 866000000  // Hz (India ISM: 865–867 MHz)
+#include <AESLib.h>
+#include <Base64.h>
+
+// --- LoRa Config ---
+#define RF_FREQUENCY 866000000  // Hz 
 #define TX_OUTPUT_POWER 14
 #define LORA_BANDWIDTH 0
 #define LORA_SPREADING_FACTOR 7
@@ -18,12 +21,41 @@
 
 #define NODE_ID 99
 
-// ================= Globals ==================
+AESLib aesLib;
+
+// --- AES key ---
+byte aes_key[16] = { 'm', 'y', 's', 'e', 'c', 'r', 'e', 't', 'k', 'e', 'y', '1', '2', '3', '4' };
+byte aes_iv[16] = { 'i', 'n', 'i', 't', 'v', 'e', 'c', '1', '2', '3', '4', '5', '6', '7' };
+
+// --- DECRYPTION ---
+
+String decryptString(String base64msg) {
+  int decodedLen = base64_dec_len(base64msg.c_str(), base64msg.length());
+  byte decoded[decodedLen];
+  memset(decoded, 0, decodedLen);
+
+  base64_decode((char *)decoded, base64msg.c_str(), base64msg.length());
+
+  byte decrypted[decodedLen + 1];
+  memset(decrypted, 0, sizeof(decrypted));
+
+  byte iv_copy[16];
+  memcpy(iv_copy, aes_iv, 16);
+
+  aesLib.decrypt(decoded, decodedLen, decrypted, aes_key, 128, iv_copy);
+  decrypted[decodedLen] = '\0';
+
+  return String((char *)decrypted);
+}
+
+
+
+// --- GLOBAL ---
 char rxpacket[BUFFER_SIZE];
 bool lora_idle = true;
 static RadioEvents_t RadioEvents;
 
-// Message cache (for duplicate filtering)
+// Message cache
 struct MessageCacheEntry {
   int src;
   int msgId;
@@ -45,7 +77,7 @@ void addToCache(int src, int msgId) {
   cacheIndex = (cacheIndex + 1) % CACHE_SIZE;
 }
 
-// ================= OLED ==================
+// --- OLED ---
 static SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED,
                            GEOMETRY_128_64, RST_OLED);
 
@@ -65,7 +97,7 @@ void showOLED(String l1, String l2 = "", String l3 = "", String l4 = "") {
   display.display();
 }
 
-// ================= LoRa Callbacks ==================
+// Callbacks
 void OnTxDone(void) {
   lora_idle = true;
   Radio.Rx(0);
@@ -77,6 +109,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   Radio.Sleep();
 
   String msg = String(rxpacket);
+  msg = decryptString(msg);
   Serial.println(msg);
 
   int sep = msg.indexOf(':');
@@ -102,7 +135,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   Radio.Rx(0);
 }
 
-// ================= Setup ==================
+// Setup
 void setup() {
   Serial.begin(115200);
   Mcu.begin(HELTEC_BOARD, SLOW_CLK_TPYE);
@@ -111,7 +144,7 @@ void setup() {
   VextON();
   delay(100);
   display.init();
-  showOLED("Starting Node...", "ID: " + String(NODE_ID));
+  showOLED("Server Node");
   delay(1000);
 
   // LoRa init
@@ -133,7 +166,7 @@ void setup() {
   Radio.Rx(0);
 }
 
-// ================= Loop ==================
+// Loop
 void loop() {
   Radio.IrqProcess();
 }
