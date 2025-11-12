@@ -1,0 +1,945 @@
+{
+  "network_name": "skAiNet",
+  "urgency_level": "LOW",
+  "total_messages": 98,
+  "logs": [
+    {
+      "source_node": 3,
+      "current_node": 4,
+      "message_id": "7890",
+      "gps": {
+        "latitude": 31.774421011066345,
+        "longitude": 76.98489288776696
+      },
+      "sender_name": "Rohan",
+      "message": "Checking in. Group of 7 safe near old market.",
+      "log_id": 5,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "1234",
+      "gps": {
+        "latitude": 31.781913217689997,
+        "longitude": 76.99766924821654
+      },
+      "sender_name": "David",
+      "message": "Comms test. Any updates on central relief distribution?",
+      "log_id": 10,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 2,
+      "message_id": "9012",
+      "gps": {
+        "latitude": 31.77932742146635,
+        "longitude": 76.9867352400991
+      },
+      "sender_name": "David",
+      "message": "All safe here, awaiting further instructions.",
+      "log_id": 13,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 5,
+      "message_id": "5566",
+      "gps": {
+        "latitude": 31.779313021251376,
+        "longitude": 76.98665808937638
+      },
+      "sender_name": "Jessica",
+      "message": "Comm system test, receiving well.",
+      "log_id": 18,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "9900",
+      "gps": {
+        "latitude": 31.781262311987835,
+        "longitude": 76.99240932692399
+      },
+      "sender_name": "John",
+      "message": "Communications test, signal appears stable.",
+      "log_id": 30,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 1,
+      "message_id": "0123",
+      "gps": {
+        "latitude": 31.781273024283184,
+        "longitude": 76.99244531332418
+      },
+      "sender_name": "Neha",
+      "message": "Testing communication, reception clear.",
+      "log_id": 39,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 4,
+      "message_id": "6058",
+      "gps": {
+        "latitude": 31.781281636741753,
+        "longitude": 76.9923237204314
+      },
+      "sender_name": "Sarah",
+      "message": "Is anyone out there? Checking in.",
+      "log_id": 43,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "7892",
+      "gps": {
+        "latitude": 31.774389727522323,
+        "longitude": 76.98495984620176
+      },
+      "sender_name": "Rohan",
+      "message": "Network test successful, update.",
+      "log_id": 47,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 3,
+      "message_id": "5555",
+      "gps": {
+        "latitude": 31.782927921440038,
+        "longitude": 77.00337122081552
+      },
+      "sender_name": "Sarah",
+      "message": "Network test, please acknowledge.",
+      "log_id": 54,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 4,
+      "message_id": "9000",
+      "gps": {
+        "latitude": 31.78305209819689,
+        "longitude": 77.00324310066094
+      },
+      "sender_name": "Raj",
+      "message": "Status update: all clear here.",
+      "log_id": 59,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 5,
+      "message_id": "5589",
+      "gps": {
+        "latitude": 31.781921140443487,
+        "longitude": 76.99761337260153
+      },
+      "sender_name": "Priya",
+      "message": "Just checking in, all safe for now. Over.",
+      "log_id": 69,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 1,
+      "message_id": "1076",
+      "gps": {
+        "latitude": 31.781915017550915,
+        "longitude": 76.99763018071572
+      },
+      "sender_name": "Emily",
+      "message": "Network test successful. Standby for further updates.",
+      "log_id": 70,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 1,
+      "message_id": "7788",
+      "gps": {
+        "latitude": 31.781217140192865,
+        "longitude": 76.99245038234768
+      },
+      "sender_name": "Chris",
+      "message": "Checking in, group is safe for now.",
+      "log_id": 79,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 2,
+      "current_node": 5,
+      "message_id": "9876",
+      "gps": {
+        "latitude": 31.779293632217,
+        "longitude": 76.98662866133378
+      },
+      "sender_name": "Aisha",
+      "message": "Radio check, can you hear me? All safe here.",
+      "log_id": 89,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 3,
+      "message_id": "4321",
+      "gps": {
+        "latitude": 31.78189327302528,
+        "longitude": 76.99754750467928
+      },
+      "sender_name": "Michael",
+      "message": "Status update: Secure area, minimal damage.",
+      "log_id": 90,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 3,
+      "message_id": "2001",
+      "gps": {
+        "latitude": 31.779257109705995,
+        "longitude": 76.9867285614304
+      },
+      "sender_name": "Aisha",
+      "message": "Signal test. Can you hear us? Over.",
+      "log_id": 97,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 2,
+      "message_id": "4567",
+      "gps": {
+        "latitude": 31.78286960239523,
+        "longitude": 77.00335513344835
+      },
+      "sender_name": "Sarah",
+      "message": "Checking in. We are safe in the third building, no major issues.",
+      "log_id": 103,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "6001",
+      "gps": {
+        "latitude": 31.78132850522957,
+        "longitude": 76.99236315027395
+      },
+      "sender_name": "Sam",
+      "message": "Comms test successful. Signal strength is stable here.",
+      "log_id": 109,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "3210",
+      "gps": {
+        "latitude": 31.77446117297922,
+        "longitude": 76.98495827822589
+      },
+      "sender_name": "Sameer",
+      "message": "Checking in, all safe.",
+      "log_id": 125,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "1122",
+      "gps": {
+        "latitude": 31.783029189420446,
+        "longitude": 77.00334488934205
+      },
+      "sender_name": "Sarah",
+      "message": "System test, over.",
+      "log_id": 128,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "3344",
+      "gps": {
+        "latitude": 31.781981746509636,
+        "longitude": 76.99773888855256
+      },
+      "sender_name": "Priya",
+      "message": "Testing communication line, please confirm.",
+      "log_id": 150,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 2,
+      "message_id": "7012",
+      "gps": {
+        "latitude": 31.779318238044898,
+        "longitude": 76.98668294205328
+      },
+      "sender_name": "Ravi",
+      "message": "Checking in from sector G, all clear and safe here.",
+      "log_id": 167,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 3,
+      "message_id": "4367",
+      "gps": {
+        "latitude": 31.781939897945875,
+        "longitude": 76.99765754747376
+      },
+      "sender_name": "Jessica",
+      "message": "Radio signal strong, receiving transmissions. Over.",
+      "log_id": 170,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 5,
+      "message_id": "5601",
+      "gps": {
+        "latitude": 31.779212739225684,
+        "longitude": 76.98671644082805
+      },
+      "sender_name": "John",
+      "message": "Checking in, all clear for now.",
+      "log_id": 173,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 2,
+      "message_id": "3567",
+      "gps": {
+        "latitude": 31.782965075411344,
+        "longitude": 77.0032024524089
+      },
+      "sender_name": "Vijay",
+      "message": "Radio test successful, awaiting instructions.",
+      "log_id": 179,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 3,
+      "message_id": "5157",
+      "gps": {
+        "latitude": 31.781946732143517,
+        "longitude": 76.99764367108817
+      },
+      "sender_name": "Mia",
+      "message": "All personnel accounted for, safe, awaiting next directives.",
+      "log_id": 189,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "1883",
+      "gps": {
+        "latitude": 31.781889564589854,
+        "longitude": 76.99766620470513
+      },
+      "sender_name": "Sanjay",
+      "message": "Testing comms link, reception clear. Over and out.",
+      "log_id": 190,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 2,
+      "message_id": "3456",
+      "gps": {
+        "latitude": 31.77922176445504,
+        "longitude": 76.98669270410113
+      },
+      "sender_name": "David",
+      "message": "Radio check, anyone copy?",
+      "log_id": 193,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 4,
+      "message_id": "5678",
+      "gps": {
+        "latitude": 31.78302218914892,
+        "longitude": 77.00322000881896
+      },
+      "sender_name": "Priya",
+      "message": "Checking in, our group is safe.",
+      "log_id": 203,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 1,
+      "current_node": 2,
+      "message_id": "7001",
+      "gps": {
+        "latitude": 31.77437961360508,
+        "longitude": 76.98505458660377
+      },
+      "sender_name": "Neha",
+      "message": "Checking in, are you receiving my messages?",
+      "log_id": 216,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 2,
+      "message_id": "4893",
+      "gps": {
+        "latitude": 31.781873744577204,
+        "longitude": 76.99772703519022
+      },
+      "sender_name": "Emily",
+      "message": "Area seems clear here, waiting for further instructions.",
+      "log_id": 220,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 1,
+      "message_id": "6005",
+      "gps": {
+        "latitude": 31.774416496169813,
+        "longitude": 76.98505256804575
+      },
+      "sender_name": "Emily",
+      "message": "Checking in, all clear so far.",
+      "log_id": 226,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 4,
+      "current_node": 3,
+      "message_id": "1221",
+      "gps": {
+        "latitude": 31.782029506688495,
+        "longitude": 76.99756290384994
+      },
+      "sender_name": "Olivia",
+      "message": "Network test successful. Over.",
+      "log_id": 230,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 2,
+      "message_id": "3045",
+      "gps": {
+        "latitude": 31.782935642951525,
+        "longitude": 77.00323112097504
+      },
+      "sender_name": "Aisha",
+      "message": "Checking in, we are safe for now.",
+      "log_id": 234,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "6210",
+      "gps": {
+        "latitude": 31.781920089927794,
+        "longitude": 76.99768370446556
+      },
+      "sender_name": "Emily",
+      "message": "System test message. All okay here.",
+      "log_id": 239,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 2,
+      "message_id": "9001",
+      "gps": {
+        "latitude": 31.77440016650317,
+        "longitude": 76.9849613753409
+      },
+      "sender_name": "Emily",
+      "message": "Just checking in, family is safe here. All good so far.",
+      "log_id": 256,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 1,
+      "current_node": 2,
+      "message_id": "6024",
+      "gps": {
+        "latitude": 31.781261400519462,
+        "longitude": 76.99241265213573
+      },
+      "sender_name": "Vikram",
+      "message": "Checking in, all safe here for now. Awaiting instructions.",
+      "log_id": 279,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "1119",
+      "gps": {
+        "latitude": 31.78189963437852,
+        "longitude": 76.99754640114986
+      },
+      "sender_name": "Chloe",
+      "message": "Network test successful. Is anyone receiving this?",
+      "log_id": 280,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 2,
+      "message_id": "1123",
+      "gps": {
+        "latitude": 31.781374840255907,
+        "longitude": 76.99247776541546
+      },
+      "sender_name": "Kavita",
+      "message": "Checking in. My family is safe but isolated.",
+      "log_id": 289,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 4,
+      "current_node": 3,
+      "message_id": "5578",
+      "gps": {
+        "latitude": 31.781857599463397,
+        "longitude": 76.99770411837106
+      },
+      "sender_name": "Ethan",
+      "message": "Comm system test. Can anyone hear this transmission?",
+      "log_id": 290,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 2,
+      "message_id": "5432",
+      "gps": {
+        "latitude": 31.783017820051402,
+        "longitude": 77.0033035101788
+      },
+      "sender_name": "Sunita",
+      "message": "Radio test, can you hear me?",
+      "log_id": 300,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "6327",
+      "gps": {
+        "latitude": 31.783018983490624,
+        "longitude": 77.0032160036271
+      },
+      "sender_name": "John",
+      "message": "Routine check-in, no immediate needs.",
+      "log_id": 303,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 2,
+      "current_node": 3,
+      "message_id": "4116",
+      "gps": {
+        "latitude": 31.78301273614158,
+        "longitude": 77.00320809157273
+      },
+      "sender_name": "David",
+      "message": "Checking in, all secure here.",
+      "log_id": 309,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 2,
+      "current_node": 3,
+      "message_id": "6509",
+      "gps": {
+        "latitude": 31.774338028594546,
+        "longitude": 76.98490814937664
+      },
+      "sender_name": "Emily",
+      "message": "Just checking in, signal is weak here.",
+      "log_id": 316,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 2,
+      "message_id": "7682",
+      "gps": {
+        "latitude": 31.781865846426975,
+        "longitude": 76.99757697249902
+      },
+      "sender_name": "Nisha",
+      "message": "Radio test, can anyone hear me?",
+      "log_id": 320,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 3,
+      "current_node": 2,
+      "message_id": "5032",
+      "gps": {
+        "latitude": 31.774329662711857,
+        "longitude": 76.98494183054449
+      },
+      "sender_name": "Sarah",
+      "message": "Checking in, all safe here.",
+      "log_id": 326,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 4,
+      "current_node": 2,
+      "message_id": "7209",
+      "gps": {
+        "latitude": 31.781888190340762,
+        "longitude": 76.99756744222323
+      },
+      "sender_name": "Fatima",
+      "message": "Network test successful, standing by.",
+      "log_id": 330,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 2,
+      "message_id": "6389",
+      "gps": {
+        "latitude": 31.781285388072085,
+        "longitude": 76.99244354081445
+      },
+      "sender_name": "Pooja",
+      "message": "Just checking in, are you receiving this?",
+      "log_id": 334,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 1,
+      "current_node": 4,
+      "message_id": "9045",
+      "gps": {
+        "latitude": 31.77928077355285,
+        "longitude": 76.98678895035908
+      },
+      "sender_name": "Rajesh",
+      "message": "Network test, please confirm receipt.",
+      "log_id": 338,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 2,
+      "current_node": 5,
+      "message_id": "5319",
+      "gps": {
+        "latitude": 31.783045006641668,
+        "longitude": 77.00336082652119
+      },
+      "sender_name": "Amit",
+      "message": "Testing communication line. Is this working? Over.",
+      "log_id": 343,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 4,
+      "message_id": "2634",
+      "gps": {
+        "latitude": 31.782879377435314,
+        "longitude": 77.00329438511429
+      },
+      "sender_name": "Emily",
+      "message": "Group of 5. All accounted for. Waiting for instructions.",
+      "log_id": 350,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 2,
+      "message_id": "8754",
+      "gps": {
+        "latitude": 31.781944384517974,
+        "longitude": 76.99770095600532
+      },
+      "sender_name": "David",
+      "message": "Just confirming communication link is active.",
+      "log_id": 364,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 3,
+      "message_id": "4503",
+      "gps": {
+        "latitude": 31.78287956741329,
+        "longitude": 77.0033666751535
+      },
+      "sender_name": "John",
+      "message": "Testing comms. All safe for now.",
+      "log_id": 373,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 5,
+      "current_node": 4,
+      "message_id": "3289",
+      "gps": {
+        "latitude": 31.781260920412226,
+        "longitude": 76.99241933782099
+      },
+      "sender_name": "Emily",
+      "message": "Radio signal weak. Can you hear me?",
+      "log_id": 378,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 3,
+      "current_node": 4,
+      "message_id": "4455",
+      "gps": {
+        "latitude": 31.781965220477495,
+        "longitude": 76.99770346208288
+      },
+      "sender_name": "Mark",
+      "message": "Just checking in, communication test. All safe here for now.",
+      "log_id": 399,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 1,
+      "message_id": "4459",
+      "gps": {
+        "latitude": 31.77929941572134,
+        "longitude": 76.9866533562306
+      },
+      "sender_name": "Meena",
+      "message": "Checking in, all safe here.",
+      "log_id": 409,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 4,
+      "current_node": 2,
+      "message_id": "7211",
+      "gps": {
+        "latitude": 31.781371572001596,
+        "longitude": 76.99241321468206
+      },
+      "sender_name": "Emily",
+      "message": "Can you hear me? Testing signal.",
+      "log_id": 410,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 4,
+      "message_id": "7766",
+      "gps": {
+        "latitude": 31.782015162479986,
+        "longitude": 76.99765404720006
+      },
+      "sender_name": "John",
+      "message": "Testing comms. Is anyone receiving this? Over.",
+      "log_id": 425,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 3,
+      "current_node": 4,
+      "message_id": "2965",
+      "gps": {
+        "latitude": 31.781204204983784,
+        "longitude": 76.99247327254656
+      },
+      "sender_name": "Michael",
+      "message": "All clear in our sector, checking in.",
+      "log_id": 433,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 1,
+      "current_node": 5,
+      "message_id": "7218",
+      "gps": {
+        "latitude": 31.77927898094687,
+        "longitude": 76.9867301543354
+      },
+      "sender_name": "John",
+      "message": "Testing comms, signal strong. Any updates?",
+      "log_id": 438,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 1,
+      "current_node": 2,
+      "message_id": "9090",
+      "gps": {
+        "latitude": 31.779230098080507,
+        "longitude": 76.98665205757602
+      },
+      "sender_name": "Michael",
+      "message": "Just checking in, all safe for now.",
+      "log_id": 449,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "7777",
+      "gps": {
+        "latitude": 31.781966518382635,
+        "longitude": 76.99773129159456
+      },
+      "sender_name": "Anjali",
+      "message": "Testing comms. How is everyone?",
+      "log_id": 450,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 5,
+      "current_node": 2,
+      "message_id": "4109",
+      "gps": {
+        "latitude": 31.779146494442962,
+        "longitude": 76.98676353428101
+      },
+      "sender_name": "David",
+      "message": "Checking in, all safe here for now.",
+      "log_id": 454,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "9183",
+      "gps": {
+        "latitude": 31.781957928907865,
+        "longitude": 76.99760467380597
+      },
+      "sender_name": "Meera",
+      "message": "Testing comms, receiving you clear.",
+      "log_id": 457,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 1,
+      "message_id": "8901",
+      "gps": {
+        "latitude": 31.78192926003136,
+        "longitude": 76.9976522598285
+      },
+      "sender_name": "Shreya",
+      "message": "Network test, is anyone receiving?",
+      "log_id": 480,
+      "urgency": "LOW",
+      "rescued": true
+    },
+    {
+      "source_node": 2,
+      "current_node": 1,
+      "message_id": "1092",
+      "gps": {
+        "latitude": 31.781377018954768,
+        "longitude": 76.9923131939219
+      },
+      "sender_name": "Omar",
+      "message": "Checking in, all safe at my location for now.",
+      "log_id": 489,
+      "urgency": "LOW",
+      "rescued": false
+    },
+    {
+      "source_node": 4,
+      "current_node": 5,
+      "message_id": "5783",
+      "gps": {
+        "latitude": 31.774383710970316,
+        "longitude": 76.98494985885301
+      },
+      "sender_name": "Meena",
+      "message": "Network test successful. Can you hear me?",
+      "log_id": 490,
+      "urgency": "LOW",
+      "rescued": false
+    }
+  ]
+}

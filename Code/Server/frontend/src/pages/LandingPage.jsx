@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMessageStore } from '../store/useMessageStore';
 import { 
-    Radio, Trash2, Download, Filter, Search, Clock, 
-    Signal, MapPin, AlertTriangle, Info, CheckCircle, 
-    Map as MapIcon, Navigation, Sun, Moon, X
+    Trash2, Download, Search, Clock, 
+    MapPin, AlertTriangle, Info, CheckCircle, 
+    Map as MapIcon, Navigation, X,
+    Radio
 } from 'lucide-react';
 
 const LandingPage = () => {
@@ -11,11 +12,24 @@ const LandingPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all');
     const [urgencyFilter, setUrgencyFilter] = useState('all');
-    const [isConnected, setIsConnected] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
     const [showAllMap, setShowAllMap] = useState(false);
     const globalMapRef = useRef(null);
     const cardMapRefs = useRef({});
+
+    // Sync dark mode with navbar
+    useEffect(() => {
+        const savedMode = localStorage.getItem('darkMode') === 'true';
+        setDarkMode(savedMode);
+        
+        const observer = new MutationObserver(() => {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            setDarkMode(isDark);
+        });
+        
+        observer.observe(document.documentElement, { attributes: true });
+        return () => observer.disconnect();
+    }, []);
 
     // Initial fetch and polling
     useEffect(() => {
@@ -25,15 +39,6 @@ const LandingPage = () => {
         }, 2000);
         return () => clearInterval(interval);
     }, [fetchMessages]);
-
-    // Track connection status
-    useEffect(() => {
-        if (!isFetchingMessages && !error) {
-            setIsConnected(true);
-        } else if (error) {
-            setIsConnected(false);
-        }
-    }, [isFetchingMessages, error]);
 
     // Initialize global map
     useEffect(() => {
@@ -220,45 +225,6 @@ const LandingPage = () => {
 
     return (
         <div className={`min-h-screen ${bgClass} transition-colors duration-200`}>
-            {/* Header */}
-            <header className={`${cardBg} border-b sticky top-0 z-50 shadow-sm transition-colors duration-200`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center space-x-3">
-                            <div className="relative">
-                                <div className={`${darkMode ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-100'} p-3 rounded-xl border`}>
-                                    <Radio className={`w-6 h-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                                    <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500'} ring-2 ${darkMode ? 'ring-slate-800' : 'ring-white'}`}></div>
-                                </div>
-                            </div>
-                            <div>
-                                <h1 className={`text-xl sm:text-2xl font-bold ${textPrimary}`}>skAiNet Monitor</h1>
-                                <p className={`text-xs sm:text-sm ${textSecondary} font-medium`}>Disaster Response Network</p>
-                            </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 sm:space-x-3">
-                            <button
-                                onClick={() => setDarkMode(!darkMode)}
-                                className={`p-2.5 rounded-xl border ${darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'} transition-all`}
-                            >
-                                {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
-                            </button>
-                            <div className={`flex items-center space-x-2 px-3 py-2 rounded-xl border ${
-                                isConnected 
-                                    ? darkMode ? 'bg-emerald-900/30 border-emerald-700 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                                    : darkMode ? 'bg-red-900/30 border-red-700 text-red-300' : 'bg-red-50 border-red-200 text-red-700'
-                            }`}>
-                                <Signal className="w-4 h-4" />
-                                <span className="text-sm font-semibold hidden sm:inline">
-                                    {isConnected ? 'Live' : 'Offline'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
             <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
                 {/* Error Alert */}
                 {error && (
@@ -400,7 +366,7 @@ const LandingPage = () => {
                 {showAllMap && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className={`${cardBg} rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col transition-colors duration-200`}>
-                            <div className="flex items-center justify-between p-4 border-b">
+                            <div className={`flex items-center justify-between p-4 border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                                 <div className="flex items-center space-x-3">
                                     <MapIcon className={`w-6 h-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                                     <h2 className={`text-xl font-bold ${textPrimary}`}>All Locations Map</h2>
@@ -425,14 +391,13 @@ const LandingPage = () => {
                     <div className={`${cardBg} rounded-xl shadow-sm border p-16 flex flex-col items-center justify-center transition-colors duration-200`}>
                         <div className="relative">
                             <div className={`w-16 h-16 border-4 ${darkMode ? 'border-slate-700 border-t-blue-500' : 'border-slate-200 border-t-blue-600'} rounded-full animate-spin`}></div>
-                            <Radio className={`w-6 h-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2`} />
                         </div>
                         <p className={`${textSecondary} font-medium mt-4`}>Connecting to network...</p>
                     </div>
                 ) : filteredMessages.length === 0 ? (
                     <div className={`${cardBg} rounded-xl shadow-sm border p-16 flex flex-col items-center justify-center transition-colors duration-200`}>
                         <div className={`${darkMode ? 'bg-slate-700' : 'bg-slate-100'} p-6 rounded-2xl mb-4`}>
-                            <Radio className={`w-12 h-12 ${textSecondary}`} />
+                            <MapPin className={`w-12 h-12 ${textSecondary}`} />
                         </div>
                         <p className={`${textPrimary} font-semibold text-lg`}>No messages found</p>
                         <p className={`${textSecondary} text-sm mt-1`}>
@@ -444,7 +409,6 @@ const LandingPage = () => {
                         {filteredMessages.map((msg, index) => {
                             const msgId = `${msg.src}-${msg.msg_id}-${index}`;
                             
-                            // Initialize map after render
                             if (msg.gps) {
                                 setTimeout(() => {
                                     if (!cardMapRefs.current[msgId]) {
@@ -458,7 +422,6 @@ const LandingPage = () => {
                                     key={msgId}
                                     className={`${cardBg} rounded-xl shadow-sm border overflow-hidden hover:shadow-lg transition-all duration-200`}
                                 >
-                                    {/* Card Header */}
                                     <div className={`p-4 border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex-1">
@@ -495,7 +458,6 @@ const LandingPage = () => {
                                         </div>
                                     </div>
 
-                                    {/* Card Map */}
                                     {msg.gps && (
                                         <div className="relative">
                                             <div id={`map-${msgId}`} className="h-48 w-full"></div>
@@ -507,7 +469,6 @@ const LandingPage = () => {
                                         </div>
                                     )}
 
-                                    {/* Card Footer */}
                                     <div className={`px-4 py-3 ${darkMode ? 'bg-slate-900/50' : 'bg-slate-50'} border-t ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                                         <div className="flex items-center justify-between text-xs">
                                             <div className="flex items-center space-x-2">
