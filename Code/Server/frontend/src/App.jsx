@@ -5,7 +5,6 @@ import ConcentrationMapPage from './Pages/ConcentrationMapPage';
 
 function App() { 
    
- 
   return (
     <div> 
       <Navbar />
