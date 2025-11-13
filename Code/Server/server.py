@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
@@ -167,7 +166,6 @@ if __name__ == "__main__":
     
     # Run Flask app
     app.run(host="0.0.0.0", port=5000, debug=False)
-=======
 from flask import Flask, render_template_string
 import serial
 import threading
@@ -286,4 +284,3 @@ def index():
 # ---------- RUN SERVER ----------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
->>>>>>> a2ea09697f5023b14cbea70e12778925d54c707d

@@ -24,6 +24,10 @@
 
 #define NODE_ID 2
 
+// --- STATIC GPS LOCATION ---
+float STATIC_LAT = 31.774428;  // Example: IIT Mandi latitude
+float STATIC_LON = 76.984960;  // Example: IIT Mandi longitude
+
 
 AESLib aesLib;
 
@@ -206,13 +210,20 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   int src = -1, cur = -1, msgId = -1;
   sscanf(header.c_str(), "SRC=%d,CUR=%d,MSG=%d", &src, &cur, &msgId);
 
+  // Extract LAT and LON directly (always present)
+  int latIndex = header.indexOf("LAT=");
+  int lonIndex = header.indexOf("LON=");
+  float lat = header.substring(latIndex + 4, header.indexOf(',', latIndex)).toFloat();
+  float lon = header.substring(lonIndex + 4, header.indexOf(':', lonIndex)).toFloat();
+
+  // --- Updated Serial Prints ---
   Serial.println("[DEBUG] Received message:");
   Serial.println("        Source: Node " + String(src));
   Serial.println("        Current: Node " + String(cur));
   Serial.println("        MsgID: " + String(msgId));
+  Serial.println("        GPS: " + String(lat, 6) + ", " + String(lon, 6));
   Serial.println("        Content: " + content);
   Serial.println("        RSSI: " + String(rssi));
-
   // Ignore own messages
   if (src != NODE_ID) {
     if (!seenMessage(src, msgId)) {
@@ -307,7 +318,7 @@ void setupWeb() {
     if (request->hasParam("info")) info = request->getParam("info")->value();
 
     int id = random(1000, 9999);
-    String payload = "SRC=" + String(NODE_ID) + ",CUR=" + String(NODE_ID) + ",MSG=" + String(id) + ":" + name + "-" + info;
+    String payload = "SRC=" + String(NODE_ID) + ",CUR=" + String(NODE_ID) + ",MSG=" + String(id) + ",LAT=" + String(STATIC_LAT, 6) + ",LON=" + String(STATIC_LON, 6) + ":" + name + "-" + info;
     pendingMsg = payload;
     startSendLoRaMessage(payload);
     showOLED("LoRa TX", name, info);
