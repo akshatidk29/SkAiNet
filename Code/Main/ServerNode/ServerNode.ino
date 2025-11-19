@@ -7,7 +7,7 @@
 #include <Base64.h>
 
 // --- LoRa Config ---
-#define RF_FREQUENCY 866000000  // Hz 
+#define RF_FREQUENCY 866000000  // Hz
 #define TX_OUTPUT_POWER 14
 #define LORA_BANDWIDTH 0
 #define LORA_SPREADING_FACTOR 7
@@ -110,8 +110,6 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 
   String msg = String(rxpacket);
   msg = decryptString(msg);
-  Serial.println(msg);
-
   int sep = msg.indexOf(':');
   if (sep == -1) {
     Radio.Rx(0);
@@ -120,19 +118,41 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 
   String header = msg.substring(0, sep);
   String content = msg.substring(sep + 1);
+  String sender = content.substring(0, content.indexOf('-'));
+  String onlyMsg = content.substring(content.indexOf('-') + 1);
+  sender.trim();
+  onlyMsg.trim();
 
   int src = -1, cur = -1, msgId = -1;
   sscanf(header.c_str(), "SRC=%d,CUR=%d,MSG=%d", &src, &cur, &msgId);
 
-  if (!seenMessage(src, msgId)) {
-    addToCache(src, msgId);
-    showOLED("LoRa RX", "From " + String(src), content, "RSSI " + String(rssi));
-    Serial.println("[DEBUG] Not Duplicate");
-  } else {
-    Serial.println("[DEBUG] Duplicate message ignored.");
-  }
+  // Extract LAT and LON directly (always present)
+  int latIndex = header.indexOf("LAT=");
+  int lonIndex = header.indexOf("LON=");
+  float lat = header.substring(latIndex + 4, header.indexOf(',', latIndex)).toFloat();
+  float lon = header.substring(lonIndex + 4, header.indexOf(':', lonIndex)).toFloat();
 
-  Radio.Rx(0);
+  // --- Updated Serial Prints ---
+  // Ignore own messages
+  if (src != NODE_ID) {
+    if (!seenMessage(src, msgId)) {
+      String jsonOutput = "{";
+      jsonOutput += "\"source_node\":" + String(src) + ",";
+      jsonOutput += "\"current_node\":" + String(cur) + ",";
+      jsonOutput += "\"message_id\":\"" + String(msgId) + "\",";
+      jsonOutput += "\"gps\":{\"latitude\":" + String(lat, 6) + ",\"longitude\":" + String(lon, 6) + "},";
+      jsonOutput += "\"sender_name\":\"" + sender + "\",";
+      jsonOutput += "\"message\":\"" + onlyMsg + "\",";
+      jsonOutput += "\"rssi\":" + String(rssi);
+      jsonOutput += "}";
+      Serial.println(jsonOutput);
+
+      addToCache(src, msgId);
+      showOLED("LoRa RX", "From " + String(src), content, "RSSI " + String(rssi));
+    }
+
+    Radio.Rx(0);
+  }
 }
 
 // Setup

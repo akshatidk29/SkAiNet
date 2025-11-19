@@ -22,12 +22,26 @@
 #define RX_TIMEOUT_VALUE 1000
 #define BUFFER_SIZE 256
 
-#define NODE_ID 2
+#define NODE_ID 3
 
-// --- STATIC GPS LOCATION ---
-float STATIC_LAT = 31.774428;  // Example: IIT Mandi latitude
-float STATIC_LON = 76.984960;  // Example: IIT Mandi longitude
+// --- STATIC GPS LOCATION (FALLBACK) ---
+float STATIC_LAT = 31.780088;  // Fallback: IIT Mandi latitude
+float STATIC_LON = 76.995973;  // Fallback: IIT Mandi longitude
 
+// --- PREDEFINED LOCATIONS ---
+struct Location {
+  String name;
+  float lat;
+  float lon;
+};
+
+Location locations[] = {
+  { "Academic Block-IIT Mandi", 31.780566, 76.997168 },
+  { "VillageSquare-IIT Mandi", 31.781070, 76.994567 },
+  { "Hockey Ground-IIT Mandi", 31.782918, 77.003476 }
+};
+
+const int NUM_LOCATIONS = 3;
 
 AESLib aesLib;
 
@@ -60,7 +74,6 @@ String encryptString(String msg) {
   return String(encoded);
 }
 
-
 String decryptString(String base64msg) {
   int decodedLen = base64_dec_len(base64msg.c_str(), base64msg.length());
   byte decoded[decodedLen];
@@ -79,8 +92,6 @@ String decryptString(String base64msg) {
 
   return String((char *)decrypted);
 }
-
-
 
 // --- GLOBAL ---
 char txpacket[BUFFER_SIZE];
@@ -117,8 +128,20 @@ void addToCache(int src, int msgId) {
   cacheIndex = (cacheIndex + 1) % CACHE_SIZE;
 }
 
+// Inbox
+struct Msg {
+  String from;
+  String content;
+  bool unread;
+};
+std::vector<Msg> inbox;
+
 // --- OLED ---
 static SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
+unsigned long lastMessageDisplayTime = 0;
+const unsigned long MESSAGE_DISPLAY_DURATION = 5000;  // 5 seconds
+bool showingMessage = false;
+
 void VextON(void) {
   pinMode(Vext, OUTPUT);
   digitalWrite(Vext, LOW);
@@ -135,6 +158,70 @@ void showOLED(String l1, String l2 = "", String l3 = "", String l4 = "") {
   display.display();
 }
 
+void displayMainScreen() {
+  display.clear();
+  display.setFont(ArialMT_Plain_16);
+  display.setTextAlignment(TEXT_ALIGN_CENTER);
+  display.drawString(64, 0, "SkAiNet Node");
+
+  display.setFont(ArialMT_Plain_24);
+  display.drawString(64, 20, String(NODE_ID));
+
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(64, 50, "Messages: " + String(inbox.size()));
+
+  display.display();
+  showingMessage = false;
+}
+
+void displayReceivedMessage(String from, String content, int rssi) {
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+
+  display.drawString(0, 0, "NEW MESSAGE");
+  display.drawLine(0, 12, 128, 12);
+
+  display.drawString(0, 16, "From: " + from);
+
+  // Wrap content text if too long
+  if (content.length() > 21) {
+    display.drawString(0, 28, content.substring(0, 21));
+    display.drawString(0, 40, content.substring(21));
+  } else {
+    display.drawString(0, 28, content);
+  }
+
+  display.drawString(0, 52, "RSSI: " + String(rssi) + " dBm");
+
+  display.display();
+  showingMessage = true;
+  lastMessageDisplayTime = millis();
+}
+
+void displaySentMessage(String name, String info) {
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+
+  display.drawString(0, 0, "SENDING MESSAGE");
+  display.drawLine(0, 12, 128, 12);
+
+  display.drawString(0, 20, "Name: " + name);
+
+  // Wrap info text if too long
+  if (info.length() > 21) {
+    display.drawString(0, 32, info.substring(0, 21));
+    display.drawString(0, 44, info.substring(21));
+  } else {
+    display.drawString(0, 32, "Info: " + info);
+  }
+
+  display.display();
+  showingMessage = true;
+  lastMessageDisplayTime = millis();
+}
+
 // --- WiFi & Captive Portal ---
 const byte DNS_PORT = 53;
 IPAddress apIP(192, 168, 4, 1);
@@ -142,14 +229,6 @@ IPAddress netMsk(255, 255, 255, 0);
 
 DNSServer dnsServer;
 AsyncWebServer server(80);
-
-// Inbox
-struct Msg {
-  String from;
-  String content;
-  bool unread;
-};
-std::vector<Msg> inbox;
 
 
 // LoRa Functions
@@ -159,9 +238,6 @@ void startSendLoRaMessage(String payload) {
   pendingMsg = payload;
   rebroadcastsLeft = REBROADCASTS;
   lastTxTime = 0;
-  Serial.println("[DEBUG] startSendLoRaMessage called:");
-  Serial.println("        Payload: " + payload);
-  Serial.println("        Rebroadcasts left: " + String(rebroadcastsLeft));
 }
 
 // Retransmission
@@ -170,8 +246,6 @@ void handleLoRaTx() {
     Radio.Send((uint8_t *)txpacket, strlen(txpacket));
     lora_idle = false;
     lastTxTime = millis();
-    Serial.println("[DEBUG] Sending message: " + String(txpacket));
-    Serial.println("        Rebroadcasts left before send: " + String(rebroadcastsLeft));
     rebroadcastsLeft--;
   }
 }
@@ -179,13 +253,11 @@ void handleLoRaTx() {
 // Callbacks
 void OnTxDone(void) {
   lora_idle = true;
-  Serial.println("[DEBUG] Transmission done.");
   Radio.Rx(0);
 }
 
 void OnTxTimeout(void) {
   lora_idle = true;
-  Serial.println("[DEBUG] Transmission timeout.");
   Radio.Rx(0);
 }
 
@@ -195,9 +267,7 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   Radio.Sleep();
 
   String msg = String(rxpacket);
-  Serial.println("Recieved Something " + msg);
   msg = decryptString(msg);
-  Serial.println("Decrypted " + msg);
   int sep = msg.indexOf(':');
   if (sep == -1) {
     Radio.Rx(0);
@@ -216,22 +286,23 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
   float lat = header.substring(latIndex + 4, header.indexOf(',', latIndex)).toFloat();
   float lon = header.substring(lonIndex + 4, header.indexOf(':', lonIndex)).toFloat();
 
-  // --- Updated Serial Prints ---
-  Serial.println("[DEBUG] Received message:");
-  Serial.println("        Source: Node " + String(src));
-  Serial.println("        Current: Node " + String(cur));
-  Serial.println("        MsgID: " + String(msgId));
-  Serial.println("        GPS: " + String(lat, 6) + ", " + String(lon, 6));
-  Serial.println("        Content: " + content);
-  Serial.println("        RSSI: " + String(rssi));
   // Ignore own messages
   if (src != NODE_ID) {
     if (!seenMessage(src, msgId)) {
-      addToCache(src, msgId);
+      String jsonOutput = "{";
+      jsonOutput += "\"source_node\":" + String(src) + ",";
+      jsonOutput += "\"current_node\":" + String(cur) + ",";
+      jsonOutput += "\"message_id\":\"" + String(msgId) + "\",";
+      jsonOutput += "\"gps\":{\"latitude\":" + String(lat, 6) + ",\"longitude\":" + String(lon, 6) + "},";
+      jsonOutput += "\"sender_name\":\"Node " + String(src) + "\",";
+      jsonOutput += "\"message\":\"" + content + "\",";
+      jsonOutput += "\"rssi\":" + String(rssi);
+      jsonOutput += "}";
+      Serial.println(jsonOutput);
 
+      addToCache(src, msgId);
       inbox.push_back({ "Node " + String(src), content, true });
-      showOLED("LoRa RX", "From " + String(src), content, "RSSI " + String(rssi));
-      Serial.println("[DEBUG] Added message to inbox and cache.");
+      displayReceivedMessage("Node " + String(src), content, rssi);
 
       // Rebroadcast
       int curIndex = msg.indexOf("CUR=");
@@ -239,71 +310,139 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
         int commaAfterCur = msg.indexOf(',', curIndex + 4);
         if (commaAfterCur == -1) commaAfterCur = msg.indexOf(':', curIndex + 4);
         if (commaAfterCur != -1) {
-          // Replace the old CUR field
           msg = msg.substring(0, curIndex) + "CUR=" + String(NODE_ID) + msg.substring(commaAfterCur);
         }
       }
 
       startSendLoRaMessage(msg);
-      Serial.println("[DEBUG] Rebroadcasting message.");
-    } else {
-      Serial.println("[DEBUG] Duplicate message ignored.");
     }
-  } else {
-    Serial.println("[DEBUG] Ignored own message.");
   }
 
   Radio.Rx(0);
 }
 
-
 // Web Server
 String htmlPage() {
   String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
-  html += "<title>SkyNet Node " + String(NODE_ID) + "</title>";
+  html += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+  html += "<title>SkAiNet Node " + String(NODE_ID) + "</title>";
 
-  // Minimal clean CSS
+  // Professional, mobile-optimized CSS
   html += "<style>"
-          "body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; margin: 0; padding: 0; }"
-          ".container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }"
-          "h2, h3 { color: #222; }"
-          "form input[type=text] { width: 100%; padding: 8px; margin: 4px 0 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }"
-          "form input[type=submit] { padding: 10px 20px; border: none; border-radius: 4px; background-color: #007bff; color: #fff; cursor: pointer; }"
-          "form input[type=submit]:hover { background-color: #0056b3; }"
-          "ul { padding-left: 20px; }"
-          "li { margin-bottom: 6px; }"
+          "* { margin: 0; padding: 0; box-sizing: border-box; }"
+          "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;"
+          "background: linear-gradient(135deg, #f0f2f5 0%, #d9dde3 100%); color: #1f2937; min-height: 100vh; padding: 20px; }"
+
+          ".container { max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 18px;"
+          "box-shadow: 0 4px 30px rgba(0,0,0,0.08); overflow: hidden; }"
+
+          ".header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 28px; text-align: center; }"
+          ".header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.3px; }"
+          ".header p { font-size: 15px; opacity: 0.95; }"
+
+          ".content { padding: 28px; }"
+
+          ".section { margin-bottom: 34px; }"
+          ".section-title { font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 16px;"
+          "padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; }"
+
+          ".form-group { margin-bottom: 18px; }"
+          ".form-group label { display: block; font-size: 14px; font-weight: 500; color: #475569; margin-bottom: 6px; }"
+
+          ".form-group input, .form-group select { width: 100%; padding: 12px 16px; font-size: 15px;"
+          "border: 1.8px solid #cbd5e1; border-radius: 10px; background-color: #f8fafc;"
+          "transition: all 0.2s ease; }"
+
+          ".form-group input:focus, .form-group select:focus { outline: none; border-color: #3b82f6; background-color: #fff;"
+          "box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }"
+
+          ".btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; color: white;"
+          "background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border: none; border-radius: 10px;"
+          "cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }"
+
+          ".btn:hover { box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35); }"
+          ".btn:active { transform: scale(0.98); }"
+
+          ".message-list { list-style: none; }"
+
+          ".message-item { background-color: #f8fafc; padding: 18px; margin-bottom: 14px;"
+          "border-radius: 12px; border-left: 5px solid #1e3a8a; }"
+
+          ".message-from { font-weight: 600; color: #1e3a8a; font-size: 14px; margin-bottom: 4px; }"
+          ".message-content { color: #475569; font-size: 15px; line-height: 1.55; }"
+
+          ".no-messages { text-align: center; padding: 34px; color: #94a3b8; font-size: 15px; }"
+
+          ".divider { height: 1px; background: linear-gradient(to right, transparent, #d1d5db, transparent); margin: 30px 0; }"
+
+          "@media (max-width: 480px) { body { padding: 10px; } .content { padding: 20px; }"
+          ".header { padding: 22px; } .header h1 { font-size: 22px; } }"
           "</style>";
+
 
   html += "</head><body>";
   html += "<div class='container'>";
-  html += "<h2>LoRa Node " + String(NODE_ID) + "</h2>";
 
-  // Send form
-  html += "<h3>Send a Message</h3>";
-  html += "<form action='/submit'>"
-          "<label>Name:</label><br>"
-          "<input type='text' name='name' required><br>"
-          "<label>Info:</label><br>"
-          "<input type='text' name='info' required><br>"
-          "<input type='submit' value='Send'>"
-          "</form><hr>";
+  // Header
+  html += "<div class='header'>";
+  html += "<h1>SkAiNet Node " + String(NODE_ID) + "</h1>";
+  html += "<p>LoRa Mesh Network Interface</p>";
+  html += "</div>";
 
-  // Inbox
-  html += "<h3>Received Messages</h3>";
+  html += "<div class='content'>";
+
+  // Send Message Section
+  html += "<div class='section'>";
+  html += "<div class='section-title'>Send Message</div>";
+  html += "<form action='/submit' method='GET'>";
+
+  html += "<div class='form-group'>";
+  html += "<label for='name'>Your Name</label>";
+  html += "<input type='text' id='name' name='name' placeholder='Enter your name' required>";
+  html += "</div>";
+
+  html += "<div class='form-group'>";
+  html += "<label for='info'>Message</label>";
+  html += "<input type='text' id='info' name='info' placeholder='Enter your message' required>";
+  html += "</div>";
+
+  html += "<div class='form-group'>";
+  html += "<label for='location'>Location</label>";
+  html += "<select id='location' name='location'>";
+  html += "<option value=''>Use Node Default Location</option>";
+  for (int i = 0; i < NUM_LOCATIONS; i++) {
+    html += "<option value='" + String(i) + "'>" + locations[i].name + "</option>";
+  }
+  html += "</select>";
+  html += "</div>";
+
+  html += "<button type='submit' class='btn'>Send Message</button>";
+  html += "</form>";
+  html += "</div>";
+
+  html += "<div class='divider'></div>";
+
+  // Inbox Section
+  html += "<div class='section'>";
+  html += "<div class='section-title'>Received Messages (" + String(inbox.size()) + ")</div>";
+
   if (inbox.empty()) {
-    html += "<p>No messages received yet.</p>";
+    html += "<div class='no-messages'>No messages received yet</div>";
   } else {
-    html += "<ul>";
-    for (auto &m : inbox) {
-      html += "<li><b>" + m.from + ":</b> " + m.content + "</li>";
+    html += "<ul class='message-list'>";
+    for (int i = inbox.size() - 1; i >= 0 && i >= (int)inbox.size() - 10; i--) {
+      html += "<li class='message-item'>";
+      html += "<div class='message-from'>" + inbox[i].from + "</div>";
+      html += "<div class='message-content'>" + inbox[i].content + "</div>";
+      html += "</li>";
     }
     html += "</ul>";
   }
 
-  html += "</div></body></html>";
+  html += "</div>";
+  html += "</div></div></body></html>";
   return html;
 }
-
 
 void setupWeb() {
   dnsServer.start(DNS_PORT, "*", apIP);
@@ -314,22 +453,37 @@ void setupWeb() {
 
   server.on("/submit", HTTP_GET, [](AsyncWebServerRequest *request) {
     String name, info;
+    float lat = STATIC_LAT;
+    float lon = STATIC_LON;
+
     if (request->hasParam("name")) name = request->getParam("name")->value();
     if (request->hasParam("info")) info = request->getParam("info")->value();
 
+    // Check if location was selected
+    if (request->hasParam("location") && request->getParam("location")->value() != "") {
+      int locIndex = request->getParam("location")->value().toInt();
+      if (locIndex >= 0 && locIndex < NUM_LOCATIONS) {
+        lat = locations[locIndex].lat;
+        lon = locations[locIndex].lon;
+      }
+    }
+
     int id = random(1000, 9999);
-    String payload = "SRC=" + String(NODE_ID) + ",CUR=" + String(NODE_ID) + ",MSG=" + String(id) + ",LAT=" + String(STATIC_LAT, 6) + ",LON=" + String(STATIC_LON, 6) + ":" + name + "-" + info;
+    String payload = "SRC=" + String(NODE_ID) + ",CUR=" + String(NODE_ID) + ",MSG=" + String(id) + ",LAT=" + String(lat, 6) + ",LON=" + String(lon, 6) + ":" + name + "-" + info;
     pendingMsg = payload;
     startSendLoRaMessage(payload);
-    showOLED("LoRa TX", name, info);
+    displaySentMessage(name, info);
 
-    Serial.println("[DEBUG] Web submit:");
-    Serial.println("        MsgID: " + String(id));
-    Serial.println("        Name: " + name);
-    Serial.println("        Info: " + info);
-    Serial.println("        Payload queued for sending.");
+    String redirect = "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
+                      "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                      "<style>body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);"
+                      "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}"
+                      ".box{background:#fff;padding:40px;border-radius:16px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.2);}"
+                      "h2{color:#667eea;margin-bottom:16px;}p{color:#4a5568;}</style>"
+                      "<meta http-equiv='refresh' content='2; url=/' /></head><body>"
+                      "<div class='box'><h2>Message Sent Successfully</h2><p>Redirecting...</p></div></body></html>";
 
-    request->send(200, "text/html", "<h3>Message sent! Redirecting...</h3><meta http-equiv='refresh' content='1; url=/' />");
+    request->send(200, "text/html", redirect);
   });
 
   // Captive portal triggers
@@ -349,24 +503,40 @@ void setupWeb() {
   server.begin();
 }
 
-// --- SetUP
+// --- SETUP ---
 void setup() {
   Serial.begin(115200);
   Mcu.begin(HELTEC_BOARD, SLOW_CLK_TPYE);
   randomSeed(micros());
+
   // OLED
   VextON();
   delay(100);
   display.init();
-  showOLED("Starting Node...", "ID: " + String(NODE_ID));
-  delay(1000);
+  display.clear();
+  display.setFont(ArialMT_Plain_16);
+  display.setTextAlignment(TEXT_ALIGN_CENTER);
+  display.drawString(64, 10, "Initializing");
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(64, 35, "SkAiNet Node " + String(NODE_ID));
+  display.display();
+  delay(2000);
 
   // WiFi AP
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, netMsk);
-  WiFi.softAP("SkyNet_" + String(NODE_ID));
+  WiFi.softAP("SkAiNet" + String(NODE_ID));
   setupWeb();
-  showOLED("AP Started", "SkyNet_" + String(NODE_ID), "IP: " + WiFi.softAPIP().toString());
+
+  display.clear();
+  display.setFont(ArialMT_Plain_10);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.drawString(0, 0, "WiFi AP Active");
+  display.drawString(0, 16, "SkAiNet" + String(NODE_ID));
+  display.drawString(0, 32, "IP: " + WiFi.softAPIP().toString());
+  display.drawString(0, 48, "Starting LoRa...");
+  display.display();
+  delay(2000);
 
   // LoRa init
   RadioEvents.TxDone = OnTxDone;
@@ -386,13 +556,21 @@ void setup() {
                     0, true, 0, 0, LORA_IQ_INVERSION_ON, true);
 
   Radio.Rx(0);
+
+  // Show main screen
+  displayMainScreen();
 }
 
-// --- Loop ---
+// --- LOOP ---
 void loop() {
   dnsServer.processNextRequest();
   Radio.IrqProcess();
   handleLoRaTx();
+
+  // Return to main screen after displaying message
+  if (showingMessage && (millis() - lastMessageDisplayTime >= MESSAGE_DISPLAY_DURATION)) {
+    displayMainScreen();
+  }
 
   if (inbox.size() > 50) inbox.erase(inbox.begin(), inbox.begin() + (inbox.size() - 50));
 }

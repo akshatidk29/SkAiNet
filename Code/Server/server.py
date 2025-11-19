@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-BACKEND_URL = "http://127.0.0.1:5000/api/GetMessages"
+BACKEND_URL = "https://skainet.onrender.com//api/GetMessages"
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 if not GEMINI_API_KEY:
@@ -36,7 +36,7 @@ def init_serial():
 def analyze_urgency_with_gemini(message_text):
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""Analyze this message and determine its urgency level. 
         Respond with ONLY one word: 'HIGH', 'MEDIUM', or 'LOW'.
